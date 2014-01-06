@@ -1,0 +1,7 @@
+Require python package
+
+	$ sudo pip install pika
+	$ sudo pip install python-gcm
+	$ sudo pip install amqp
+	$ sudo pip install psutil
+

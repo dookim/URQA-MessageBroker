@@ -1,0 +1,34 @@
+ {
+    "apikey": "12312312",
+    "datetime": "yyyy-mm-dd hh:mm:ss",
+    "device": "IMS-16C",
+    "country": "KR",
+    "appversion": "1.2",
+    "osversion": "4.1.1",
+    "gpson": "0",
+    "wifion": "0",
+    "mobileon": "0",
+    "scrwidth": "800",
+    "scrheight": "1024",
+    "batterylevel": "89",
+    "availsdcard": "1024",
+    "rooted": "0",
+    "appmemtotal": "11",
+    "appmemfree": "12",
+    "appmemmax": "13",
+    "kernelversion": "string",
+    "xdpi": "float",
+    "ydpi": "float",
+    "scrorientation": "0",
+    "sysmemlow": "0",
+    "tag": "string",
+    "rank": "0",
+    "eventpaths":[
+            {"datetime": "yyyy-mm-dd hh:mm:ss",
+             "classname": "string",
+             "methodname":"string",
+             "linenum": "123",
+             "label": "string" 
+             }
+           ]
+}

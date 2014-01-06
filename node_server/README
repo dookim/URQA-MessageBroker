@@ -1,0 +1,13 @@
+iFighter Server Project
+
+	Node.js Modlue List
+		1. express
+		2. jade
+		3. redis
+		4. sprintf
+		5. underscore
+		6. vows
+		7. winston
+		8. gkasync (custom module)
+		9. node-uuid
+

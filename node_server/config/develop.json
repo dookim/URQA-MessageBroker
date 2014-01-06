@@ -1,0 +1,17 @@
+{
+    "dev": true,
+    "host": "0.0.0.0",
+    "port": 55555,
+
+    "mqExchangeName":"urqa-exchange",
+    "mqQueueName":"urqa-queue",
+
+    "mq": {
+      "host":"127.0.0.1",
+      "port":5672,
+      "login":"guest",
+      "password":"guest",
+      "authMechanism":"AMQPLAIN",
+      "vhost":"/"
+    }
+}

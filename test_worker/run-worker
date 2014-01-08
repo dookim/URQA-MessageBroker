@@ -1,0 +1,53 @@
+#!/bin/sh
+
+PYTHON="/usr/bin/python"
+CLIENT="receive.py"
+DAEMON="$PYTHON $PWD/$CLIENT"
+NAME="run-worker"
+PIDDIR="$PWD/pid"
+PID="$PWD/pid/$NAME.pid"
+LOGDIR="$PWD/log"
+
+
+
+set -e 
+
+. /lib/lsb/init-functions
+
+pre_command() {
+#	if [ ! -d $PIDDIR ]; then
+#		mkdir $PIDDIR
+#	fi
+#
+#	if [ ! -d $LOGDIR]; then
+#		mkdir $LOGDIR
+#	fi
+#
+	if [ -f $PID ]; then
+		rm $PID
+	fi
+}
+
+case "$1" in
+	start)
+		echo -n "Start .. "
+		pre_command
+		#start-stop-daemon --start --quiet --background --pidfile $PID --make-pidfile --exec $DAEMON -- $DAEMON_OPTS || true
+		start-stop-daemon --start --quiet --background --pidfile $PID --make-pidfile --exec $DAEMON || true
+		echo "$NAME"
+		;;
+	stop)
+		echo -n "Stop .. "
+		start-stop-daemon --stop --quiet --pidfile $PID --exec $DAEMON -- $DAEMON_OPTS || true
+		echo "$NAME"
+		;;
+	status)
+		status_of_proc -p $PID "$DAEMON" && exit 0 || exit $?
+		;;
+	*)
+		echo "Usage: $0 {start|stop|status}"
+		;;
+esac
+exit 0
+
+

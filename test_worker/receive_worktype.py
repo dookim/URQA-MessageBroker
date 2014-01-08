@@ -29,7 +29,8 @@ if __name__ == '__main__':
         channel.basic_consume(callback, queue='urqa-queue', no_ack=True)
         channel.start_consuming()
     except (KeyboardInterrupt):#, SystemExit):
-        logger.debug('Program Exit....\n')
+        print " [*]Program Exit....\n"
+        
     channel.stop_consuming()
     connection.close()
     sys.exit(1)

@@ -8,7 +8,7 @@ var queueName      = gk.config.mqQueueName;
 exports.send = function(req, res) {  
   
   var index;
-  for(index=1; index < 100; index++){
+  for(index=0; index < 100; index++){
     var data = {"info": { "app_id":"loggerData", "type": "access" },
                 "data": { "aid":"CVC001" ,"page": "/quest/progress","is_smartphone":1,"device":4,"timestamp": 13806902 }
                }

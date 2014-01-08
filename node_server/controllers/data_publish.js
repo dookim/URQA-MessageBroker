@@ -12,11 +12,11 @@ exports.send = function(req, res) {
   console.log('sampleExceptionData\n' + sampleExceptionData);
   console.log('sampleNativeData\n' + sampleNativeData);
 
-  for(index=1; index < 50; index++){
+  for(index=0; index < 50; index++){
     mq_pubhandler.publish(queueName, sampleExceptionData);
     } //Exception Sample Data
 
-  for(index=1; index < 50; index++){
+  for(index=0; index < 50; index++){
     mq_pubhandler.publish(queueName, sampleNativeData);
     } //Native Sample Data
 

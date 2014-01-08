@@ -4,10 +4,10 @@ var publish = require(__dirname + '/../controllers/data_publish');
 
 var routes = function(app) {
   // test
-  app.post('/test/publish$',test.send);
+  app.post('/test/publish',test.send);
   
   //bumpdata
-  app.post('/publish$', publish.send);
+  app.post('/publish', publish.send);
   
   //app.post('/urqa$', rqa.views.index);
   //app.post('/urqa/posttest$', urqa.views.posttest);

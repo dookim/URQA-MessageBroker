@@ -7,7 +7,7 @@ var routes = function(app) {
   app.post('/test/publish$',test.send);
   
   //bumpdata
-  app.post('/publish$', publish.send);
+  app.post('/publish', publish.send);
   
   //app.post('/urqa$', rqa.views.index);
   //app.post('/urqa/posttest$', urqa.views.posttest);

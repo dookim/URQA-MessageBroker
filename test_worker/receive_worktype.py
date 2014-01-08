@@ -28,7 +28,7 @@ def callback(ch, method, properties, body):
 
 if __name__ == '__main__':
     try:
-        channel.basic_consume(callback, queue='ur-queue', no_ack=True)
+        channel.basic_consume(callback, queue='urqa-queue', no_ack=True)
         channel.start_consuming()
     except (KeyboardInterrupt):#, SystemExit):
         #logger.debug('Program Exit....\n')

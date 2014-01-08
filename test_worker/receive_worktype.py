@@ -18,8 +18,7 @@ channel.queue_bind(exchange ='urqa-exchange', queue = 'urqa-queue')
 #channel.queue_declare(queue='if-push-queue',durable= True,auto_delete=False)
 #channel.basic_publish(exchange = 'if-push-exchange')
 print " [*] Waiting for messages. To exit press CTRL+C"
-logger.info(" [*] Waiting for messages. To exit press CTRL+C")
-#print " [*] Waiting for messages. To exit press CTRL+C"
+
 
 def callback(ch, method, properties, body):
     print " [x] Received %r\n\n" % (body,)

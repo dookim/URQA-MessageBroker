@@ -2,7 +2,7 @@ import sys
 import pika
 import json
 
-credentials = pika.PlainCredentials('guest', 'guest')
+credentials = pika.PlainCredentials('urqa', 'urqa')
 parameters  = pika.ConnectionParameters(host='14.63.164.245', 
                                         port=5672, 
                                         credentials=credentials)
@@ -10,11 +10,11 @@ parameters  = pika.ConnectionParameters(host='14.63.164.245',
 connection  = pika.BlockingConnection(parameters)
 channel     = connection.channel()
 
-channel.queue_declare(queue='ur-queue', durable=True)
+channel.queue_declare(queue='urqa-queue', durable=True)
 
 message = 'urqa-test message!!!'
 channel.basic_publish(exchange='',
-                      routing_key='ur-queue',
+                      routing_key='urqa-queue',
                       body = message)
 
 '''

@@ -3,7 +3,7 @@ import pika
 import json
 
 
-credentials = pika.PlainCredentials('guest', 'guest')
+credentials = pika.PlainCredentials('urqa', 'urqa')
 parameters  = pika.ConnectionParameters(host='14.63.164.245', 
                                         port=5672, 
                                         credentials=credentials)

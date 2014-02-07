@@ -2,9 +2,9 @@ import os
 import subprocess
 import psutil
 
-class PJAProcess:
+class Process:
     def __init__(self, ps_data=None):
-        """PJA!!! Process"""
+        """URQAProcess!!!"""
         if ps_data is None:
             print "PID filename must be not null"
             raise
@@ -45,8 +45,8 @@ class PJAProcess:
         self.retried = True
 
     def __repr__(self):
-        return "PJAProcess: " + self.fullpath + '(' + str(self.pid) + ')'
+        return "URQAProcess: " + self.fullpath + '(' + str(self.pid) + ')'
 
     def __str__(self):
-        return "PJAProcess: " + self.fullpath + '(' + str(self.pid) + ')'
+        return "URQAProcess: " + self.fullpath + '(' + str(self.pid) + ')'
 

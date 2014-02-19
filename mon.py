@@ -1,18 +1,16 @@
 import os
 import time
-
 from URQAProcess import URQAProcess
 
 # pid_list = psutil.get_pid_list()
 # print pid_list
 
+# 아파치 pid 파일 위치 "/var/run/apache2.pid" or command 명령 -> "service apache2 status"
+# PIDS_DIR_PATH 를 절대 경로로 변뎡 해야 함.
 PIDS_DIR_PATH = os.path.abspath(os.path.dirname(__file__)) + '/pid'
 print PIDS_DIR_PATH
 NOTIFY_RETRY_COUNT = 10
 WAIT_TIME = 1
-
-# processes
-# global processes
 
 # process state
 activate = True

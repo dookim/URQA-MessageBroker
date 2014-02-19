@@ -2,22 +2,18 @@ import os
 import time
 from URQAProcess import URQAProcess
 
-# pid_list = psutil.get_pid_list()
-# print pid_list
-
 # pegasus command 
 # apache2 pid file path "/var/run/apache2.pid" or command: "service apache2 status"
-# PIDS_DIR_PATH change
 
-#PIDS_DIR_PATH = os.path.abspath(os.path.dirname(__file__)) + '/pid'
+# PIDS_DIR_PATH change
+# PIDS_DIR_PATH = os.path.abspath(os.path.dirname(__file__)) + '/pid'
 PIDS_DIR_PATH = '/var/run'
 print PIDS_DIR_PATH
 NOTIFY_RETRY_COUNT = 10
-WAIT_TIME = 1
+WAIT_TIME = 10
 
 # process state
 activate = True
-
 # retry count
 retry = 0
 

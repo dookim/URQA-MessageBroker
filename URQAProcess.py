@@ -2,7 +2,7 @@ import os
 import subprocess
 import psutil
 
-class Process:
+class URQAProcess:
     def __init__(self, ps_data=None):
         """URQAProcess!!!"""
         if ps_data is None:

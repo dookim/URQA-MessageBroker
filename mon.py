@@ -9,7 +9,8 @@ from URQAProcess import URQAProcess
 # apache2 pid file path "/var/run/apache2.pid" or command: "service apache2 status"
 # PIDS_DIR_PATH change
 
-PIDS_DIR_PATH = os.path.abspath(os.path.dirname(__file__)) + '/pid'
+#PIDS_DIR_PATH = os.path.abspath(os.path.dirname(__file__)) + '/pid'
+PIDS_DIR_PATH = '/var/run/apache2.pid'
 print PIDS_DIR_PATH
 NOTIFY_RETRY_COUNT = 10
 WAIT_TIME = 1

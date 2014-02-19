@@ -10,7 +10,7 @@ from URQAProcess import URQAProcess
 # PIDS_DIR_PATH change
 
 #PIDS_DIR_PATH = os.path.abspath(os.path.dirname(__file__)) + '/pid'
-PIDS_DIR_PATH = '/var/run/apache2.pid'
+PIDS_DIR_PATH = '/var/run'
 print PIDS_DIR_PATH
 NOTIFY_RETRY_COUNT = 10
 WAIT_TIME = 1
@@ -22,7 +22,9 @@ activate = True
 retry = 0
 
 def read_file(file_name):
-    fullpath = PIDS_DIR_PATH + '/' + file_name
+    #fullpath = PIDS_DIR_PATH + '/' + file_name
+    file_name = 'apache2.pid' 
+    fullpath  = '/var/run/apache2.pid'
     with open(fullpath) as pid_file:
         pid = pid_file.readline()
         pid = pid.rstrip()

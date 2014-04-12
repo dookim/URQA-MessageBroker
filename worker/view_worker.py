@@ -9,9 +9,9 @@ import subprocess
 import datetime
 
 from django.http import HttpResponse
-from models import Appruncount
-from models import Projects
-from models import Session
+from model.models import Appruncount
+from model.models import Projects
+from model.models import Session
 
 '''
 from django.views.decorators.csrf import csrf_exempt

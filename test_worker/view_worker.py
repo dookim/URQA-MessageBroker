@@ -1,3 +1,6 @@
+
+# -*- coding: utf-8 -*-
+
 import sys
 import pika
 import json
@@ -50,9 +53,11 @@ channel.queue_bind(exchange ='urqa-exchange', queue = 'urqa-queue')
 print " [*] Waiting for messages. To exit press CTRL+C"
 
 
+
 def callback(ch, method, properties, body):
 
     print " [x] Received %r\n\n" % (body,)
+
     firstData = json.loads(body,encoding='utf-8')
    
     # 데이터 형식

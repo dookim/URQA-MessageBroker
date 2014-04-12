@@ -39,6 +39,7 @@ print " [*] Waiting for messages. To exit press CTRL+C"
 
 def callback(ch, method, properties, body):
     print " [x] Received %r\n\n" % (body,)
+    
     try:
         data = json.loads(body)
     except (ValueError):
@@ -60,7 +61,7 @@ def callback(ch, method, properties, body):
     if type(receivers) is not list:
         print 'Invalid receivers'
         #logger.error('Invalid receivers')
-        return
+        returnqsx37 
 
 if __name__ == '__main__':
     try:

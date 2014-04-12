@@ -56,12 +56,13 @@ while True:
     time.sleep(WAIT_TIME)
 
 
-'''
 def notify_if_needed(retry):
     if retry > NOTIFY_RETRY_COUNT:
         # send email or something
-        # exit process
+        # exit processes
 
+        
+'''
 def need_to_wait(activate):
     if activate == False:
         print "Wating..."

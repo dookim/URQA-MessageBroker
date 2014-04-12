@@ -29,7 +29,6 @@ from utility import naive2aware
 from utility import getUTCDatetime
 from utility import getUTCawaredate
 from utility import RANK
-
 from config import get_config
 
 
@@ -75,8 +74,7 @@ def callback(ch, method, properties, body):
             return HttpResponse(json.dumps({'idsession':'0'}), 'application/json');
 
         #step2: idsession 발급하기
-        appversion = jsonData['appversion'
-        ]
+        appversion = jsonData['appversion']
         idsession = long(time.time() * 1000)
         Session.objects.create(idsession=idsession,pid=projectElement,appversion=appversion)
         print 'Project: %s, Ver: %s, new idsession: %d' % (projectElement.name,appversion,idsession)
@@ -89,14 +87,15 @@ def callback(ch, method, properties, body):
         else:
             print 'project: %s, new version: %s' % (projectElement.name,appruncountElement.appversion)
         return HttpResponse(json.dumps({'idsession':idsession}), 'application/json');
+
+
     }
 
     if(tag == 'receive_exception'){    
-    
     }
 
     if(tag == 'receive_native'){
-
+    
     }
 
 

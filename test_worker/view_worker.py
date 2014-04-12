@@ -66,7 +66,7 @@ def callback(ch, method, properties, body):
     tag = firstData['tag']
     body = firstData['data']
 
-    if tag == 'connect'
+    if tag == 'connect':
         jsonData = json.loads(body,encoding='utf-8')
         #print jsonData
 

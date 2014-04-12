@@ -9,35 +9,10 @@ import subprocess
 import datetime
 
 from django.http import HttpResponse
+
 from model import Project
 from model import Appruncount
 from model import Session
-
-'''
-from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import ObjectDoesNotExist
-
-from urqa.models import Sessionevent
-from urqa.models import Projects
-from urqa.models import Errors
-from urqa.models import Instances
-from urqa.models import Eventpaths
-from urqa.models import Tags
-
-from urqa.models import Sofiles
-from urqa.models import Appstatistics
-from urqa.models import Osstatistics
-from urqa.models import Devicestatistics
-from urqa.models import Countrystatistics
-from urqa.models import Activitystatistics
-from urqa.models import Proguardmap
-
-from utility import naive2aware
-from utility import getUTCDatetime
-from utility import getUTCawaredate
-from utility import RANK
-from config import get_config
-'''
 
 
 credentials = pika.PlainCredentials('urqa', 'urqa')
@@ -97,20 +72,11 @@ def callback(ch, method, properties, body):
             print 'project: %s, new version: %s' % (projectElement.name,appruncountElement.appversion)
         return HttpResponse(json.dumps({'idsession':idsession}), 'application/json');
 
-
     #if tag == 'receive_exception'
-
     #if tag == 'receive_native'
-    
-
     #if tag == 'receive_eventpath'
-    
-
     #if tag == 'receive_native_dump'
-
-
     #if tag == 'receive_exception_log'
-    
 
 
 if __name__ == '__main__':

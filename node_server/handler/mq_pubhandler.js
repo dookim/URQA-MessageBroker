@@ -14,7 +14,6 @@ var retry           = 3;
 
 connection.addListener('ready', function () {
   console.log("connected to " + connection.serverProperties.product);
-  
   var exchange = connection.exchange(exports.LOGER_EXCHANGE_NAME ,{ type:"fanout", durable:true } );
   _queue[exports.LOGER_QUEUE_NAME] = exchange;
   _isReady = true;
@@ -27,7 +26,6 @@ process.addListener('exit', function () {
 
 
 exports.publish = function(queueName, msg) {
-
   var retVal;
   console.log('pushData :', msg);
 
@@ -55,7 +53,7 @@ exports.publish = function(queueName, msg) {
     // TODO: binding queue automatically
     _isReady = false;
     console.log("WhatTheHuck? Couldn't find the queue");
-    return;
+    callback(_isReady);
   }
 };
 

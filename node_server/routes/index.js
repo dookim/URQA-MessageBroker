@@ -10,11 +10,14 @@ var routes = function(app) {
   // bump data
   app.post('/publish', publish.send);
   
+
   //client module
-  app.post('/urqa/client/connect', client.connect);
-  app.post('/urqa/client/send/exception', client.receive_exception);
+  app.post('/urqa/client/connect', client.connect);                  //  sdjfs;kf
+  app.post('/urqa/client/send/exception', client.receive_exception); //  ahslgakads
+
   app.post('/urqa/client/send/exception/native', client.receive_native);
   app.post('^urqa/client/send/exception/dump/(?P<idinstance>\d+)$', client.receive_native_dump),
+
   app.post('^urqa/client/send/exception/log/(?P<idinstance>\d+)$', client.receive_exception_log),
   app.post('/urqa/client/send/eventpath$', client.receive_eventpath);
 }

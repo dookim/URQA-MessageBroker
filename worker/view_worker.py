@@ -4,16 +4,28 @@
 import sys
 import pika
 import json
+import MySQLdb as db
 
 import subprocess
 import datetime
+import datetime
+import logging
 
+#logging.getLogger('pika').setLevel(logging.DEBUG)
+logger = logging.getLogger('logger')
+handler = logging.FileHandler('/home/gumidev/workspace/gna/log/gna.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+
+
+'''
 from django.http import HttpResponse
-
 from model import Project
 from model import Appruncount
 from model import Session
-
+'''
 
 credentials = pika.PlainCredentials('urqa', 'urqa')
 parameters  = pika.ConnectionParameters(host='14.63.164.245', 
@@ -26,12 +38,47 @@ channel     = connection.channel()
 channel.queue_declare(queue='urqa-queue', durable=True)
 channel.queue_bind(exchange ='urqa-exchange', queue = 'urqa-queue')
 
+try:
+    con = db.connect(host='10.17.134.138',port=3306, user = 'gumidev',passwd='rnalzhfldk80*()',db='gna');
+    con.autocommit(True)  
+
+    cur = con.cursor()
+    cur.execute("SELECT VERSION()")
+    ver = cur.fetchone()
+    print " [*] Database version : %s " % ver
+    cur.close()
+except db.Error, e:
+        print "Error %d: %s" % (e.args[0],e.args[1])
+        logger.error('database connect')
+        sys.exit(1)
+finally:    
+    pass
+        #if con:
+            #con.close()
+
+
+'''
+
+    if infoType == 'access':  # or infoType == 'dailyaccesslog':
+        time = datetime.datetime.fromtimestamp(int(logData['timestamp'])).strftime('%Y-%m-%d %H:%M:%S')
+        print(time)
+        cur  = con.cursor()
+        query = "INSERT INTO gamelog_dailyaccesslog(`osuser_id`,`accessed_at`,`is_smartphone`,`device`) VALUES ('{}','{}',{}, {});".format(logData['aid'], time, logData['is_smartphone'], logData['device']);
+        print "access query-> %r\n" % query
+        try:
+            cur.execute(query)
+            cur.close()
+            print "access data insert ok!!\n\n"
+        except:
+            logger.error('Access data insert Error\n')
+            logger.error(query)
+'''
+
+
 
 #channel.queue_declare(queue='if-push-queue',durable= True,auto_delete=False)
 #channel.basic_publish(exchange = 'if-push-exchange')
 print " [*] Waiting for messages. To exit press CTRL+C"
-
-
 
 def callback(ch, method, properties, body):
 
@@ -47,7 +94,6 @@ def callback(ch, method, properties, body):
 
     if tag == 'connect':
         jsonData = json.loads(body,encoding='utf-8')
-        #print jsonData
 
         #step1: apikey를 이용하여 project찾기
         try:

@@ -8,18 +8,23 @@ import json
 import subprocess
 import datetime
 
+from urqa.models import Appruncount
 from django.http import HttpResponse
+
+from urqa.models import Projects
+from urqa.models import Session
+'''
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 
-from urqa.models import Session
+
 from urqa.models import Sessionevent
 from urqa.models import Projects
 from urqa.models import Errors
 from urqa.models import Instances
 from urqa.models import Eventpaths
 from urqa.models import Tags
-from urqa.models import Appruncount
+
 from urqa.models import Sofiles
 from urqa.models import Appstatistics
 from urqa.models import Osstatistics
@@ -33,7 +38,7 @@ from utility import getUTCDatetime
 from utility import getUTCawaredate
 from utility import RANK
 from config import get_config
-
+'''
 
 
 credentials = pika.PlainCredentials('urqa', 'urqa')

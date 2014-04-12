@@ -9,9 +9,9 @@ import subprocess
 import datetime
 
 from django.http import HttpResponse
-from woker.models import Appruncount
-from woker.models import Projects
-from woker.models import Session
+from models import Appruncount
+from models import Projects
+from models import Session
 
 '''
 from django.views.decorators.csrf import csrf_exempt

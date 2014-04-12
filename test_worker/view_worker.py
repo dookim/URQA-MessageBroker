@@ -66,7 +66,7 @@ def callback(ch, method, properties, body):
     tag = firstData['tag']
     body = firstData['data']
 
-    if(tag == 'connect')
+    if tag == 'connect'
         jsonData = json.loads(body,encoding='utf-8')
         #print jsonData
 
@@ -92,20 +92,20 @@ def callback(ch, method, properties, body):
         else:
             print 'project: %s, new version: %s' % (projectElement.name,appruncountElement.appversion)
         return HttpResponse(json.dumps({'idsession':idsession}), 'application/json');
-        
 
-    #if(tag == 'receive_exception')
 
-    #if(tag == 'receive_native')
+    #if tag == 'receive_exception'
+
+    #if tag == 'receive_native'
     
 
-    #if(tag == 'receive_eventpath')
+    #if tag == 'receive_eventpath'
     
 
-    #if(tag == 'receive_native_dump')
+    #if tag == 'receive_native_dump'
 
 
-    #if(tag == 'receive_exception_log')
+    #if tag == 'receive_exception_log'
     
 
 

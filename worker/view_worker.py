@@ -26,11 +26,17 @@ from model import Project
 from model import Appruncount
 from model import Session
 '''
-
+'''
+db address : ur-qa.com  14.63.164.245
+db port : 3306
+db id : root
+db pw : stanly
+'''
 credentials = pika.PlainCredentials('urqa', 'urqa')
 parameters  = pika.ConnectionParameters(host='14.63.164.245', 
                                         port=5672, 
                                         credentials=credentials)
+
 
 connection  = pika.BlockingConnection(parameters)
 channel     = connection.channel()
@@ -39,7 +45,7 @@ channel.queue_declare(queue='urqa-queue', durable=True)
 channel.queue_bind(exchange ='urqa-exchange', queue = 'urqa-queue')
 
 try:
-    con = db.connect(host='10.17.134.138',port=3306, user = 'gumidev',passwd='rnalzhfldk80*()',db='gna');
+    con = db.connect(host='14.63.164.245',port=3306, user = 'root',passwd='stanly',db='gna');
     con.autocommit(True)  
 
     cur = con.cursor()

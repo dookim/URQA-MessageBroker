@@ -86,8 +86,8 @@ def get_config(option):
 #Create and engine and get the metadata
 try :
     Base = declarative_base()
-    engine= create_engine("mysql://root:stanly@ur-qa.com/urqa?charset=utf8",encoding='utf-8',echo=False)
-    #engine= create_engine("mysql://root:stanly@ur-qa.com/urqa",encoding='utf-8',echo=True)
+    engine= create_engine("mysql://root:@stanly@urqa@127.0.0.1:3306/urqa?charset=utf8",encoding='utf-8',echo=False)
+    #engine= create_engine("mysql://root:@stanly@urqa@125.209.196.85/urqa?charset=utf8",encoding='utf-8',echo=False)
     metadata = MetaData(bind=engine)
     session = create_session(bind=engine)
 except Exception as e:
@@ -131,6 +131,9 @@ class Eventpaths(Base):
 
 class Appruncount(Base):
     __table__ = Table('appruncount', metadata, autoload=True)
+
+class Sofiles(Base):
+    __table__ = Table('sofiles', metadata, autoload=True)
 
 
 
@@ -201,8 +204,7 @@ def callback(ch, method, properties,body):
         #step 1 : idinstance에 해당하는 인스턴스 구하기
         #idinstance=firstData["idinstance"]
         #jsonData
-        jsonData = data_body
-        jsonData=client_data_validate(jsonData)
+        jsonData=client_data_validate(data_body)
 
         #step1: apikey를 이용하여 project찾기
         #apikey가 validate한지 확인하기.
@@ -218,8 +220,6 @@ def callback(ch, method, properties,body):
             print 'Invalid apikey'
             return
         logging.info("step 1 complete")
-
-
 
         print >> sys.stderr, 'receive_exception requested',apikey
 
@@ -484,6 +484,322 @@ def callback(ch, method, properties,body):
             session.flush()
             depth -= 1
         logging.info("step 5 complete")
+    '''
+    elif tag == 'receive_native':
+        logging.info("receive_native")
+        jsonData = client_data_validate(data_body)
+
+        #step1: apikey를 이용하여 project찾기
+        #apikey가 validate한지 확인하기.
+        try:
+            apikey = jsonData['apikey']
+            projectElement = session.query(Projects).filter_by(apikey=apikey).first();
+            if projectElement == None:
+                raise NoResultFound
+        except NoResultFound:
+            print 'Invalid apikey'
+            return
+
+        #step2: dummy errorElement생성
+        #새로 들어온 에러라면 새로운 에러 생성
+        #if int(jsonData['rank']) == -1:
+        #autodetermine = 1 #True
+        #else:
+        #autodetermine = 0 #False
+        autodetermine = 0
+
+        errorElement = Errors(
+            pid = projectElement.pid,
+            errorname = 'dummy',
+            errorclassname = 'native',
+            linenum = 0,
+            autodetermine = autodetermine,
+            rank = int(jsonData['rank']), # Undesided = -1, unhandled = 0, critical = 1, major = 2, minor = 3, native = 4
+            status = 0, # 0 = new, 1 = open, 2 = ignore, 3 = renew
+            createdate = getUTCawaredatetime1(),
+            lastdate = getUTCawaredatetime1(),
+            numofinstances = 1,
+            callstack = '',#jsonData['callstack'],
+            wifion = jsonData['wifion'],
+            gpson = jsonData['gpson'],
+            mobileon = jsonData['mobileon'],
+            totalmemusage = jsonData['appmemtotal'],
+            errorweight = 10,
+            recur = 0,
+        )
+        session.add(errorElement)
+        session.flush()
+
+        #step3: 테그 저장
+        tagstr = jsonData['tag']
+        if tagstr:
+            #tagElement, created = Tags.objects.get_or_create(iderror=errorElement,pid=projectElement,tag=tagstr)
+            tagElement, created = get_or_create(session,Tags,id=errorElement.iderror, pid=projectElement.pid, tag=tagstr)
+
+        #step4: 인스턴스 생성하기
+        instanceElement = Instances(
+            iderror = errorElement.iderror,
+            ins_count = errorElement.numofinstances,
+            sdkversion = jsonData['sdkversion'],
+            appversion = jsonData['appversion'],
+            osversion = jsonData['osversion'],
+            kernelversion = jsonData['kernelversion'],
+            appmemmax = jsonData['appmemmax'],
+            appmemfree = jsonData['appmemfree'],
+            appmemtotal = jsonData['appmemtotal'],
+            country = jsonData['country'],
+            datetime = getUTCawaredatetime1(),
+            locale = jsonData['locale'],
+            mobileon = jsonData['mobileon'],
+            gpson = jsonData['gpson'],
+            wifion = jsonData['wifion'],
+            device = jsonData['device'],
+            rooted = jsonData['rooted'],
+            scrheight = jsonData['scrheight'],
+            scrwidth = jsonData['scrwidth'],
+            scrorientation = jsonData['scrorientation'],
+            sysmemlow = jsonData['sysmemlow'],
+            log_path = '',
+            batterylevel = jsonData['batterylevel'],
+            availsdcard = jsonData['availsdcard'],
+            xdpi = jsonData['xdpi'],
+            ydpi = jsonData['ydpi'],
+            lastactivity = jsonData['lastactivity'],
+        )
+        # primary key가 Auto-incrementing이기 때문에 save한 후 primary key를 읽을 수 있다.
+        session.add(instanceElement)
+        session.flush()
+
+        #step4: dump파일 저장하기
+        if firstData.has_key("log"):
+            dump_path = os.path.join(PROJECT_DIR,os.path.join(get_config('dmp_pool_path'), '%s.dmp' % str(instanceElement.idinstance)))
+
+            f = file(dump_path,'w')
+            f.write(firstData['log'].encode('utf-8'))
+            f.close()
+            print 'log received : %s' % dump_path
+
+            #step3: 저장한 로그파일을 db에 명시하기
+            instanceElement.dump_path = dump_path
+            session.add(instanceElement)
+            session.flush()
+
+            #step4: dmp파일 분석(with nosym)
+            arg = [os.path.join(PROJECT_DIR,get_config('minidump_stackwalk_path')) , dump_path]
+            fd_popen = subprocess.Popen(arg, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            (stdout, stderr) = fd_popen.communicate()
+
+            #so library 추출
+            libs = []
+            stderr_split = stderr.splitlines()
+            for line in stderr_split:
+                if line.find('Couldn\'t load symbols') == -1: #magic keyword
+                    continue
+                lib = line[line.find('for: ')+5:].split('|')
+                if lib[1] == '000000000000000000000000000000000' or lib[0] in Ignore_clib.list:
+                    continue
+                #print lib[1] + ' ' + lib[0]
+                libs.append(lib)
+
+            #DB저장하기
+            for lib in libs:
+                #sofileElement, created = Sofiles.objects.get_or_create(pid=projectElement, appversion=instanceElement.appversion, versionkey=lib[1], filename=lib[0],defaults={'uploaded':'X'})
+                sofileElement, created = get_or_create2(session,Sofiles,defaults={'uploaded':'X'},appversion=instanceElement.appversion, versionKey=lib[1], filename=lib[0])
+                if created:
+                    print 'new version key : ', lib[1], lib[0]
+                else:
+                    print 'version key:', lib[1], lib[0], 'already exists'
+
+            #ErrorName, ErrorClassname, linenum 추출하기
+            cs_flag = 0
+            errorname = ''
+            errorclassname = ''
+            linenum = ''
+            stdout_split = stdout.splitlines()
+            for line in stdout_split:
+                if line.find('Crash reason:') != -1:
+                    errorname = line.split()[2]
+                if cs_flag:
+                    if line.find('Thread') != -1 or errorclassname:
+                        break
+                    #errorclassname 찾기
+                    for lib in libs:
+                        flag = line.find(lib[0])
+                        if flag == -1:
+                            continue
+                        separator = line.find(' + ')
+                        if separator != -1:
+                            errorclassname = line[flag:separator]
+                            linenum = line[separator+3:]
+                        else:
+                            errorclassname = line[flag:]
+                            linenum = 0
+                        break
+                if line.find('(crashed)') != -1:
+                    cs_flag = 1
+
+            #dmp파일 분석(with sym)
+            sym_pool_path = os.path.join(PROJECT_DIR,os.path.join(get_config('sym_pool_path'),str(projectElement.apikey)))
+            sym_pool_path = os.path.join(sym_pool_path, instanceElement.appversion)
+            arg = [os.path.join(PROJECT_DIR,get_config('minidump_stackwalk_path')) , dump_path, sym_pool_path]
+            fd_popen = subprocess.Popen(arg, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            (stdout, stderr) = fd_popen.communicate()
+
+            cs_count = 0
+            callstack = ''
+            stdout_split = stdout.splitlines()
+            for line in stdout_split:
+                if line.find('(crashed)') != -1:
+                    callstack = line
+                    cs_count = cs_count + 1
+                elif cs_count:
+                    if line.find('Thread') != -1 or cs_count > 40:
+                        break;
+                    callstack += '\n'
+                    callstack += line
+                    cs_count = cs_count + 1
+
+            #print callstack
+            try:
+                #errorElement_exist = Errors.objects.get(pid=projectElement, errorname=errorname, errorclassname=errorclassname, linenum=linenum)
+                errorElement_exist = session.query(Errors).filter_by(pid=projectElement.pid, errorname=errorname, errorclassname=errorclassname,linenum=linenum)
+                if errorElement_exist == None:
+                    raise NoResultFound
+                errorElement_exist.lastdate = errorElement.lastdate
+                errorElement_exist.numofinstances += 1
+                errorElement_exist.wifion += errorElement.wifion
+                errorElement_exist.gpson += errorElement.gpson
+                errorElement_exist.mobileon += errorElement.mobileon
+                errorElement_exist.totalmemusage += errorElement.totalmemusage
+                #errorElement_exist.save()
+                session.add(errorElement_exist)
+                session.flush()
+
+                instanceElement.iderror = errorElement_exist.iderror
+                session.add(instanceElement)
+                session.flush()
+
+                #e, created = Appstatistics.objects.get_or_create(iderror=errorElement,appversion=instanceElement.appversion,defaults={'count':1})
+                e, created =  get_or_create2(session,Appstatistics,defaults={'count':1},iderror=errorElement.iderror, appversion=instanceElement.appversion)
+                if not created:
+                    e.count += 1
+                    #e.save()
+                    session.add(e)
+                    session.flush()
+                #e, created = Osstatistics.objects.get_or_create(iderror=errorElement,osversion=instanceElement.osversion,defaults={'count':1})
+                e, created =  get_or_create2(session,Osstatistics,defaults={'count':1},iderror=errorElement.iderror,osversion=instanceElement.osversion)
+                if not created:
+                    e.count += 1
+                    session.add(e)
+                    session.flush()
+                #e, created = Devicestatistics.objects.get_or_create(iderror=errorElement,devicename=instanceElement.device,defaults={'count':1})
+                e, created =  get_or_create2(session,Devicestatistics,defaults={'count':1},iderror=errorElement.iderror,devicename=instanceElement.device)
+                if not created:
+                    e.count += 1
+                    session.add(e)
+                    session.flush()
+                #e, created = Countrystatistics.objects.get_or_create(iderror=errorElement,countryname=instanceElement.country,defaults={'count':1})
+                e, created =  get_or_create2(session,Countrystatistics,defaults={'count':1},iderror=errorElement.iderror,countryname=instanceElement.country)
+                if not created:
+                    e.count += 1
+                    session.add(e)
+                    session.flush()
+                #e, created = Activitystatistics.objects.get_or_create(iderror=errorElement,activityname=instanceElement.lastactivity,defaults={'count':1})
+                e, created =  get_or_create2(session,Activitystatistics,defaults={'count':1},iderror=errorElement.iderror,countryname=instanceElement.country)
+                if not created:
+                    e.count += 1
+                    session.add(e)
+                    session.flush()
+
+
+                session.delete(errorElement)
+                session.flush()
+                #errorscore 계산  에러스코어삭제
+                #calc_errorScore(errorElement_exist)
+                print 'native error %s:%s already exist' % (errorname, errorclassname)
+            except NoResultFound:
+                errorElement.errorname = errorname
+                errorElement.errorclassname = errorclassname
+                errorElement.callstack = callstack
+                errorElement.linenum = linenum
+                #errorElement.save()
+                session.add(errorElement)
+                session.flush()
+                session.add(Appstatistics(iderror=errorElement.iderror,appversion=instanceElement.appversion,count=1))
+                session.flush()
+                session.add(Osstatistics(iderror=errorElement.iderror,osversion=instanceElement.osversion,count=1))
+                session.flush()
+                session.add(Devicestatistics(iderror=errorElement.iderror,devicename=instanceElement.device,count=1))
+                session.flush()
+                session.add(Countrystatistics(iderror=errorElement.iderror,countryname=instanceElement.country,count=1))
+                session.flush()
+                session.add(Activitystatistics(iderror=errorElement.iderror,activityname=instanceElement.lastactivity,count=1))
+                session.flush()
+        #step5: 이벤트패스 생성ls
+        #print 'here! ' + instanceElement.idinstance
+        #instanceElement.update()
+        appversion = jsonData['appversion']
+
+        map_path = os.path.join(PROJECT_DIR,get_config('proguard_map_path'))
+        map_path = os.path.join(map_path,projectElement.apikey)
+        map_path = os.path.join(map_path,appversion)
+
+        try:
+            #mapElement = Proguardmap.objects.get(pid=projectElement,appversion=appversion)
+            mapElement = session.query(Proguardmap).filter_by(pid=projectElement.pid, appversion=appversion)
+            if mapElement == None:
+                raise NoResultFound
+        except NoResultFound:
+            mapElement = None
+            print 'no proguard mapfile'
+
+        #step5-0:이벤트 패스 실제로 만드는 부분
+        print 'instanceElement.idinstance',instanceElement.idinstance
+        eventpath = jsonData['eventpaths']
+
+        depth = 10
+        for event in reversed(eventpath):
+            temp_str = event['classname'] + '.' + event['methodname']
+            temp_str = proguard_retrace_oneline(temp_str,event['linenum'],map_path,mapElement)
+            flag = temp_str.rfind('.')
+            classname = temp_str[0:flag]
+            methodname =  temp_str[flag+1:]
+
+            if not 'label' in event:    #event path에 label적용, 기존버전과 호환성을 확보하기위해 'label'초기화를 해줌 client ver 0.91 ->
+                event['label'] = ""
+            event_path=Eventpaths(
+                idinstance = instanceElement.idinstance,
+                iderror = errorElement.iderror,
+                ins_count = errorElement.numofinstances,
+                datetime = naive2aware(event['datetime']),
+                classname = classname,
+                methodname = methodname,
+                linenum = event['linenum'],
+                label = event['label'],
+                depth = depth,
+            )
+            session.add(event_path)
+            session.flush()
+            depth -= 1
+    '''
+
+class Ignore_clib:
+    list = [
+        'libWVStreamControlAPI_L1',
+        'libwebviewchromium',
+        'libLLVM.so',
+        'libdvm.so',
+        'libc.so',
+        'libcutils.so',
+        'app_process',
+        'libandroid_runtime.so',
+        'libutils.so',
+        'libbinder.so',
+        'libjavacore.so',
+        'librs_jni.so',
+        'linker',
+    ]
+
 
 def getUTCawaredatetime():
     now = datetime.datetime.utcnow()
@@ -499,7 +815,6 @@ def getUTCawaredatetime1():
     naivetime = datetime.datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
     time_str = str(naivetime.replace(tzinfo=pytz.utc))
     #return time_str[:10]
-    print time_str[:19]
     return time_str[:19]
 
 def naive2aware(time_str):

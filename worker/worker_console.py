@@ -36,6 +36,7 @@ LOG_DIR = "./worker_log"
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
 logging.basicConfig(filename = os.path.join(LOG_DIR, str(os.getpid())+".log") , level=logging.INFO)
+
 #rabbit mq서버에 접속, exchanger생성하고  exchanger와 queue끼리 바인딩 시킴.
 credentials = pika.PlainCredentials('urqa', 'urqa')
 parameters  = pika.ConnectionParameters(host='127.0.0.1',
@@ -71,11 +72,20 @@ path_and_name = pid_path + filename
 
 #filename을 지정해 파일 생성
 pid_file=open(path_and_name, "w+")
-err_log_file= open(pid_path + str(os.getpid()) + ".txt","w+");
 
 #create file
 pid_file.write(str(os.getpid()))
 pid_file.close()
+
+
+#인터럽트설정
+def signal_handler(signal, frame):
+    print 'You pressed Ctrl+C!'
+    os.remove(path_and_name)
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+
 
 def get_config(option):
     return cfg.get('urqa',option)
@@ -87,7 +97,6 @@ def get_config(option):
 try :
     Base = declarative_base()
     engine= create_engine("mysql://root:@stanly@urqa@127.0.0.1:3306/urqa?charset=utf8",encoding='utf-8',echo=False)
-    #engine= create_engine("mysql://root:@stanly@urqa@125.209.196.85/urqa?charset=utf8",encoding='utf-8',echo=False)
     metadata = MetaData(bind=engine)
     session = create_session(bind=engine)
 except Exception as e:
@@ -1070,14 +1079,9 @@ if __name__ == '__main__':
     try:
         channel.basic_consume(callback, queue="urqa-queue", no_ack=True)
         channel.start_consuming()
-    except (KeyboardInterrupt):#, SystemExit):
-        print 'KeyboardInterrupt Program Exit....\n'
-        os.remove(path_and_name)
     except Exception as e:
         print e
         os.remove(path_and_name)
-        err_log_file.write(e.message);
-        err_log_file.close()
         sys.exit(1)
 
 	channel.stop_consuming()

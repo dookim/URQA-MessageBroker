@@ -65,7 +65,15 @@ if not os.path.exists(pid_path) :
 
 #filename지정
 filelist = os.listdir(pid_path)
-worker_index = len(filelist) + 1
+
+#마지막 파일의 index구하기
+max = 0
+for f in filelist:
+    value =int(f[6:7])
+    if max < value :
+        max = value
+
+worker_index = max + 1
 filename = "worker" + str(worker_index) + ".pid"
 
 path_and_name = pid_path + filename
@@ -78,7 +86,7 @@ pid_file.write(str(os.getpid()))
 pid_file.close()
 
 
-#인터럽트설정
+#인터럽트설정 인터럽트가 오는경우 pid파일 제거
 def signal_handler(signal, frame):
     print 'You pressed Ctrl+C!'
     os.remove(path_and_name)
@@ -90,7 +98,7 @@ signal.signal(signal.SIGINT, signal_handler)
 def get_config(option):
     return cfg.get('urqa',option)
 
-#'latin-1' codec can't encode characters in position 0-2: ordinal not in range(256)
+
 
 #SQL ALCHEMY를 사용한 DB CONNECTION을 맺는 부분
 #Create and engine and get the metadata
@@ -170,7 +178,6 @@ def callback(ch, method, properties,body):
     #idinstance = firstData['idinstance']
 
     if tag == 'connect':
-
 
         #step1: apikey를  project찾기
         try:
@@ -1081,7 +1088,6 @@ if __name__ == '__main__':
         channel.start_consuming()
     except Exception as e:
         print e
-        os.remove(path_and_name)
         sys.exit(1)
 
 	channel.stop_consuming()

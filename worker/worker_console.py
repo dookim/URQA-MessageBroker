@@ -35,7 +35,9 @@ from sqlalchemy.sql.expression import ClauseElement
 LOG_DIR = "./worker_log"
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
-logging.basicConfig(filename = os.path.join(LOG_DIR, str(os.getpid())+".log") , level=logging.INFO)
+
+log_file_path=os.path.join(LOG_DIR, str(os.getpid())+".log")
+logging.basicConfig(filename = log_file_path , level=logging.INFO)
 
 #rabbit mq서버에 접속, exchanger생성하고  exchanger와 queue끼리 바인딩 시킴.
 credentials = pika.PlainCredentials('urqa', 'urqa')
@@ -70,16 +72,16 @@ filelist = os.listdir(pid_path)
 max = 0
 for f in filelist:
     value =int(f[6:7])
-    if max < value :
+    if max < value:
         max = value
 
 worker_index = max + 1
 filename = "worker" + str(worker_index) + ".pid"
 
-path_and_name = pid_path + filename
+pid_file_path = pid_path + filename
 
 #filename을 지정해 파일 생성
-pid_file=open(path_and_name, "w+")
+pid_file=open(pid_file_path, "w+")
 
 #create file
 pid_file.write(str(os.getpid()))
@@ -89,7 +91,8 @@ pid_file.close()
 #인터럽트설정 인터럽트가 오는경우 pid파일 제거
 def signal_handler(signal, frame):
     print 'You pressed Ctrl+C!'
-    os.remove(path_and_name)
+    os.remove(log_file_path)
+    os.remove(pid_file_path)
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)

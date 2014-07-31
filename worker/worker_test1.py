@@ -46,8 +46,11 @@ parameters  = pika.ConnectionParameters(host='127.0.0.1',
 connection  = pika.BlockingConnection(parameters)
 channel     = connection.channel()
 
-channel.queue_declare(queue='urqa.queue', durable=True)
-channel.queue_bind(exchange ='urqa.exchange', queue = 'urqa.queue')
+queue_name = 'urqa.queue'
+exchange_name = 'urqa.exchange'
+
+channel.queue_declare(queue=queue_name, durable=True)
+channel.queue_bind(exchange =exchange_name, queue = queue_name)
 
 #PROJECT_DIR = get_config('project_dir')
 PROJECT_DIR = "/home/urqa/urqa/release/URQA-Server/soma3"
@@ -795,7 +798,7 @@ if __name__ == '__main__':
     try :
         while(True) :
             try:
-                channel.basic_consume(callback, queue="urqa.queue", no_ack=True)
+                channel.basic_consume(callback, queue=queue_name, no_ack=True)
                 channel.start_consuming()
             except Exception as e:
                 print e
